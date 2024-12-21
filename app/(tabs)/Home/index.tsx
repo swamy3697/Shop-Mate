@@ -3,9 +3,11 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, FlatList } from "react-native";
 import { router } from 'expo-router';
 import { Ionicons } from "@expo/vector-icons";
-import LocationSearchBar from "@/app/components/LocationSearchBar";
+
 import EmptyDoodleContainer from "@/app/components/emptyDoodleContainer";
 import Colors from "@/app/Colors";
+import SearchBar from "@/app/components/searchBar";
+import DummySearchBar from "@/app/components/dummySearchBar";
 
 // Temporary type for shopping list items
 interface ShopListItem {
@@ -29,7 +31,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Search Bar */}
       <View style={styles.searchBarContainer}>
-        <LocationSearchBar
+        <DummySearchBar
           onSearch={handleSearch}
           onLocationPress={() => {}}
           placeholder="Search For Items"

@@ -11,7 +11,7 @@ interface LocationSearchBarProps {
   placeholder?: string;
 }
 
-const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
+const DummySearchBar: React.FC<LocationSearchBarProps> = ({
   placeholder = "Search a place...",
 }) => {
   const handlePress = () => {
@@ -71,4 +71,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LocationSearchBar;
+export default DummySearchBar;
