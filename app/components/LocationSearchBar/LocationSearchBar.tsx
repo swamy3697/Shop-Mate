@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+// app/components/LocationSearchBar/LocationSearchBar.tsx
+import React from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import { router } from 'expo-router';
+import Colors from "@/app/Colors";
 
 interface LocationSearchBarProps {
   onSearch: (query: string) => void;
@@ -10,65 +12,56 @@ interface LocationSearchBarProps {
 }
 
 const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
-  onSearch,
-  onLocationPress,
   placeholder = "Search a place...",
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = () => {
-    onSearch(searchQuery);
-  };
-
-  const handleLocationPress = () => {
-    onLocationPress();
+  const handlePress = () => {
+    router.push('/Home/search');
   };
 
   return (
-    <View style={styles.container}>
-
-      <TouchableOpacity onPress={handleLocationPress} style={styles.iconContainer}>
-        <Ionicons name="location-sharp" size={24} color="#75B565"/>
-      </TouchableOpacity>
-
-      <View style={styles.divider} />
-
-      <TextInput
-        style={styles.searchInput}
-        placeholder={placeholder}
-        placeholderTextColor="#888"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        onSubmitEditing={handleSearch}
-      />
-
-      <View style={styles.divider} />
-      <TouchableOpacity onPress={handleSearch} style={styles.iconContainer}>
-        <Ionicons name="search" size={24} color="#75B565" />
-      </TouchableOpacity>
-
-      
-    </View>
+    <TouchableOpacity 
+      style={styles.container}
+      onPress={handlePress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.searchContent}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder={placeholder}
+          placeholderTextColor="#888"
+          editable={false} // Make input non-editable
+          pointerEvents="none" // Disable pointer events
+        />
+        <View style={styles.divider} />
+        <View style={styles.iconContainer}>
+          <Ionicons name="search" size={24} color={Colors.lightGreen} />
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: "#f0f0f0",
     borderRadius: 10,
-    paddingHorizontal: 10,
     height: 50,
-    width: "100%", 
+    width: "100%",
+  },
+  searchContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
   },
   iconContainer: {
     padding: 5,
   },
   searchInput: {
-    flex: 1, // Fills remaining space
+    flex: 1,
     marginHorizontal: 10,
     fontSize: 16,
+    color: "#888",
   },
   divider: {
     height: "70%",

@@ -10,8 +10,7 @@ export default function AccountLayout() {
         headerTitleStyle: { fontWeight: "bold", fontSize: 18 },
 
      }}>
-      <Stack.Screen name="index" options={{ title: "Profile" }} />
-      <Stack.Screen name="details" options={{ title: "User Details" }} />
+      <Stack.Screen name="index" options={{ title: "Settings" }} />
     </Stack>
   );
 }
