@@ -1,6 +1,8 @@
+// app/components/itemCard/ItemCard.tsx
 import React, { useState, memo } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput, Modal } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput, Modal, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import Colors from '@/app/Colors';
 
 interface ItemCardProps {
@@ -12,36 +14,31 @@ interface ItemCardProps {
     quantityType?: string;
   };
   onAdd: (item: any) => void;
+  onDelete?: (id: number) => void;
   isNewItem?: boolean;
 }
 
-const QUANTITY_TYPES = ['Kg', 'Liters', 'Packets', 'Pieces', 'Grams', 'Units', 'Dozens', 'Boxes'];
+const QUANTITY_TYPES = ['Kg', 'Liters', 'Rupees','Packets', 'Pieces', 'Grams', 'Units', 'Dozens', 'Boxes'];
 
-const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, isNewItem = false }) => {
+const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, onDelete, isNewItem = false }) => {
   const defaultImage = 'https://via.placeholder.com/100';
   const [quantity, setQuantity] = useState<number>(item.quantity || 1);
   const [quantityType, setQuantityType] = useState<string>(item.quantityType || 'Pieces');
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(quantity.toString());
+  const [isAdded, setIsAdded] = useState(false);
+  const fadeAnim = new Animated.Value(1);
 
   const updateQuantity = (newValue: number) => {
-    if (newValue >= 1 && newValue <= 25) {
+    if (newValue >= 1 && newValue <= 99) {
       setQuantity(newValue);
       setInputValue(newValue.toString());
     }
   };
 
-  const handleIncrement = () => {
-    updateQuantity(quantity + 1);
-  };
-
-  const handleDecrement = () => {
-    updateQuantity(quantity - 1);
-  };
-
   const handleQuantityChange = (text: string) => {
-    setInputValue(text); // Update the input value immediately for responsiveness
+    setInputValue(text);
     const num = parseInt(text);
     if (!isNaN(num) && num >= 1 && num <= 25) {
       setQuantity(num);
@@ -50,21 +47,48 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, isNewItem = false
 
   const handleInputBlur = () => {
     setIsEditing(false);
-    // When input loses focus, ensure the display value is valid
     const num = parseInt(inputValue);
     if (isNaN(num) || num < 1 || num > 25) {
-      setInputValue(quantity.toString()); // Reset to last valid quantity
+      setInputValue(quantity.toString());
     } else {
       updateQuantity(num);
     }
   };
 
   const handleAdd = () => {
+    setIsAdded(true);
     onAdd({ ...item, quantity, quantityType });
+    
+    // Animate the icon change
+    Animated.sequence([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const handleItemPress = () => {
+    if (item.id) {
+      router.push({
+        pathname: '/Home/ItemView',
+        params: { id: item.id }
+      });
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity 
+      onPress={handleItemPress}
+      style={[styles.container, { backgroundColor: Colors.lightGray }]}
+      activeOpacity={0.7}
+    >
       <Image
         source={{ uri: item.image || defaultImage }}
         style={styles.image}
@@ -76,7 +100,7 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, isNewItem = false
         <View style={styles.controlsRow}>
           <View style={styles.quantityControls}>
             <TouchableOpacity 
-              onPress={handleDecrement}
+              onPress={() => updateQuantity(quantity - 1)}
               style={styles.quantityButton}
             >
               <Ionicons name="remove" size={16} color={Colors.white} />
@@ -103,7 +127,7 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, isNewItem = false
             </TouchableOpacity>
             
             <TouchableOpacity 
-              onPress={handleIncrement}
+              onPress={() => updateQuantity(quantity + 1)}
               style={styles.quantityButton}
             >
               <Ionicons name="add" size={16} color={Colors.white} />
@@ -120,16 +144,18 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, isNewItem = false
         </View>
       </View>
 
-      <TouchableOpacity 
-        style={[styles.addButton, isNewItem && styles.newItemButton]}
-        onPress={handleAdd}
-      >
-        <Ionicons 
-          name={isNewItem ? "add-circle" : "add"} 
-          size={24} 
-          color={Colors.white}
-        />
-      </TouchableOpacity>
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <TouchableOpacity 
+          style={[styles.addButton, isNewItem && styles.newItemButton]}
+          onPress={handleAdd}
+        >
+          <Ionicons 
+            name={isAdded ? "checkmark-circle" : isNewItem ? "add-circle" : "cart"} 
+            size={24} 
+            color={Colors.white} 
+          />
+        </TouchableOpacity>
+      </Animated.View>
 
       <Modal
         visible={showModal}
@@ -166,24 +192,18 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, isNewItem = false
           </View>
         </TouchableOpacity>
       </Modal>
-    </View>
+    </TouchableOpacity>
   );
 });
-// ... styles remain the same ...
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderRadius: 8,
     padding: 12,
     marginHorizontal: 15,
     marginVertical: 4,
     alignItems: 'center',
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderRadius: 12,
   },
   image: {
     width: 50,
@@ -208,7 +228,7 @@ const styles = StyleSheet.create({
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.lightGray,
+    backgroundColor: Colors.white,
     borderRadius: 6,
     height: 32,
   },
@@ -238,7 +258,7 @@ const styles = StyleSheet.create({
   typeSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.lightGray,
+    backgroundColor: Colors.white,
     paddingHorizontal: 8,
     height: 32,
     borderRadius: 6,

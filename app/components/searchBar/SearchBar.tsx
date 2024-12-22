@@ -1,4 +1,3 @@
-
 // app/components/searchBar/SearchBar.tsx
 import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
@@ -8,12 +7,14 @@ import Colors from '@/app/Colors';
 interface SearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
+  onClear: () => void;
   placeholder?: string;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChangeText,
+  onClear,
   placeholder = "Search items..."
 }) => {
   return (
@@ -26,6 +27,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
           placeholder={placeholder}
           placeholderTextColor="#888"
         />
+        {value.length > 0 && (
+          <TouchableOpacity onPress={onClear} style={styles.clearButton}>
+            <Ionicons name="close-circle" size={20} color={Colors.gray} />
+          </TouchableOpacity>
+        )}
         <View style={styles.divider} />
         <TouchableOpacity style={styles.iconContainer}>
           <Ionicons name="search" size={24} color={Colors.lightGreen} />
@@ -40,7 +46,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     borderRadius: 10,
     height: 50,
-    marginHorizontal: 15,  // Changed from width: "100%" to use margins
+    marginHorizontal: 15,
     marginVertical: 10,
   },
   searchContent: {
@@ -63,6 +69,9 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: "#ccc",
     marginHorizontal: 5,
+  },
+  clearButton: {
+    padding: 5,
   },
 });
 

@@ -13,6 +13,7 @@ export default function HomeLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Home" }} />
       <Stack.Screen name="search" options={{ title: "Search" }} />
+      <Stack.Screen name="itemView" options={{ title: "Item" }} />
     
     </Stack>
   );
