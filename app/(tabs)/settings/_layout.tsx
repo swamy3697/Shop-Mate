@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import Colors from "@/app/Colors";
+import { Colors,ColorOpacity } from '@/app/Colors';
 
 export default function AccountLayout() {
   return (

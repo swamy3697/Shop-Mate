@@ -1,5 +1,3 @@
-// app/services/databaseService.ts
-
 import { Storage } from "@/app/models/schema";
 import { Item } from "@/app/models/schema";
 import { ShopListItem } from "@/app/models/schema";
@@ -28,18 +26,40 @@ export const DatabaseService = {
       return Storage.items.getAll();
     },
 
-
-async delete(id: string): Promise<void> {
-  const items = await Storage.items.getAll();
-  const filteredItems = items.filter(item => item.id !== id);
-  await Storage.items.save(filteredItems);
-},
+    async delete(id: string): Promise<void> {
+      const items = await Storage.items.getAll();
+      const filteredItems = items.filter(item => item.id !== id);
+      await Storage.items.save(filteredItems);
+    },
 
     async search(query: string): Promise<Item[]> {
       const items = await Storage.items.getAll();
       return items.filter(item => 
         item.name.toLowerCase().includes(query.toLowerCase())
       );
+    },
+
+    async save(items: Item[]): Promise<void> {
+      await Storage.items.save(items);
+    },
+
+    async update(id: string, data: Partial<Omit<Item, 'id' | 'createdAt'>>): Promise<Item> {
+      const items = await Storage.items.getAll();
+      const index = items.findIndex(item => item.id === id);
+      
+      if (index === -1) {
+        throw new Error(`Item with id ${id} not found`);
+      }
+
+      const updatedItem = {
+        ...items[index],
+        ...data,
+        updatedAt: new Date()
+      };
+
+      items[index] = updatedItem;
+      await Storage.items.save(items);
+      return updatedItem;
     }
   },
 
@@ -49,6 +69,7 @@ async delete(id: string): Promise<void> {
       const newItem: ShopListItem = {
         id: generateId(),
         ...item,
+        imagePath: item.imagePath, // Explicitly include imagePath
         completed: false,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -57,7 +78,6 @@ async delete(id: string): Promise<void> {
       await Storage.shopList.save(items);
       return newItem;
     },
-
     async getAll(): Promise<ShopListItem[]> {
       return Storage.shopList.getAll();
     },

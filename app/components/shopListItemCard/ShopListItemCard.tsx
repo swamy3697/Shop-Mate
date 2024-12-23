@@ -1,8 +1,7 @@
-// app/components/shopListItemCard/ShopListItemCard.tsx
 import React, { memo } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Colors from '@/app/Colors';
+import { Colors, ColorOpacity } from '@/app/Colors';
 
 interface ShopListItemCardProps {
   item: {
@@ -22,7 +21,15 @@ const ShopListItemCard: React.FC<ShopListItemCardProps> = memo(({
   onToggleComplete,
   onDelete 
 }) => {
-  const defaultImage = 'https://via.placeholder.com/100';
+  const defaultImage = require('../../assets/images/default.png');
+
+  const getImageSource = () => {
+    console.log('ShopListItem received:', item);
+    if (!item.image && !item.image) return defaultImage;
+    return { uri: item.image|| item.image };
+  };
+
+  console.log(item.image);
 
   return (
     <View style={[styles.container, item.completed && styles.completedContainer]}>
@@ -38,8 +45,9 @@ const ShopListItemCard: React.FC<ShopListItemCardProps> = memo(({
       </TouchableOpacity>
 
       <Image
-        source={{ uri: item.image || defaultImage }}
+        source={getImageSource()}
         style={styles.image}
+        defaultSource={defaultImage}
       />
       
       <View style={styles.details}>
@@ -55,7 +63,7 @@ const ShopListItemCard: React.FC<ShopListItemCardProps> = memo(({
         style={styles.deleteButton}
         onPress={() => onDelete(item.id)}
       >
-        <Ionicons name="trash-outline" size={20} color={Colors.gray} />
+        <Ionicons name="trash-outline" size={20} color={Colors.error} />
       </TouchableOpacity>
     </View>
   );
@@ -78,9 +86,8 @@ const styles = StyleSheet.create({
   },
   completedContainer: {
     opacity: 0.7,
-    color:Colors.white,
-    
-    backgroundColor: Colors.primaryGreen,
+    color: Colors.textOnPrimary,
+    backgroundColor: Colors.selected,
   },
   checkbox: {
     marginRight: 8,
@@ -97,16 +104,16 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: Colors.black,
+    color: Colors.textPrimary,
     marginBottom: 4,
   },
   completedText: {
     textDecorationLine: 'line-through',
-    color: Colors.gray,
+    color: Colors.textDisabled,
   },
   quantity: {
     fontSize: 13,
-    color: Colors.darkGray,
+    color: Colors.info,
   },
   deleteButton: {
     padding: 8,

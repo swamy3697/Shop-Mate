@@ -1,47 +1,60 @@
-// app/(tabs)/Home/search.tsx
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, FlatList, StyleSheet, ToastAndroid, Platform, Alert } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import SearchBar from '@/app/components/searchBar';
 import ItemCard from '@/app/components/itemCard';
 import EmptySearchResult from '@/app/components/EmptySearchResults';
-import Colors from '@/app/Colors';
+import { Colors,ColorOpacity } from '@/app/Colors';
 import { DatabaseService } from '@/app/services/databaseService';
 import { Item as DatabaseItem } from '@/app/models/schema';
 
 interface ItemCardProps {
-  id?: number;
+  id?: string;
   name: string;
   image?: string;
   quantity: number;
   quantityType: string;
 }
 
-
 const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [items, setItems] = useState<DatabaseItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<DatabaseItem[]>([]);
   const [showNewItemCard, setShowNewItemCard] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadItems();
-  }, []);
-
-  const loadItems = async () => {
+  const loadItems = useCallback(async () => {
     try {
+      setIsLoading(true);
       const dbItems = await DatabaseService.items.getAll();
       setItems(dbItems);
-      setFilteredItems(dbItems);
+      
+      // Reapply current search filter to the new items
+      if (searchQuery.trim() !== '') {
+        handleSearch(searchQuery);
+      } else {
+        setFilteredItems(dbItems);
+      }
     } catch (error) {
       console.error('Error loading items:', error);
+      showNotification('Failed to load items', true);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [searchQuery]); // Include searchQuery in dependencies
 
-  const showNotification = (message: string) => {
+  // Add useFocusEffect to reload data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadItems();
+    }, [loadItems])
+  );
+
+  const showNotification = (message: string, isError: boolean = false) => {
     if (Platform.OS === 'android') {
       ToastAndroid.show(message, ToastAndroid.SHORT);
     } else {
-      Alert.alert('Success', message);
+      Alert.alert(isError ? 'Error' : 'Success', message);
     }
   };
 
@@ -70,38 +83,23 @@ const SearchScreen = () => {
       item.name.toLowerCase().includes(text.toLowerCase())
     );
 
-    // If we have partial matches, show them along with the new item card
     setFilteredItems(partialMatches);
-    
-    // Always show the new item card when there's no exact match
     setShowNewItemCard(true);
-
   }, [items]);
 
-
-
-  const handleDeleteItem = async (id: number) => {
+  const handleDeleteItem = async (itemId: string) => {
     try {
-      // First remove from the UI
-      const newItems = items.filter(item => parseInt(item.id) !== id);
-      setItems(newItems);
-      setFilteredItems(prevFiltered => 
-        prevFiltered.filter(item => parseInt(item.id) !== id)
-      );
-  
-      // Then remove from the database
-      await DatabaseService.items.delete(id.toString());
+      await DatabaseService.items.delete(itemId);
       showNotification('Item deleted successfully');
+      loadItems(); // Reload items after deletion
     } catch (error) {
       console.error('Error deleting item:', error);
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('Failed to delete item', ToastAndroid.SHORT);
-      } else {
-        Alert.alert('Error', 'Failed to delete item');
-      }
+      showNotification('Failed to delete item', true);
     }
   };
 
+  // Rest of the component remains the same...
+  // (Keep all other existing code, just ensure loadItems is called when needed)
 
   const handleClear = useCallback(() => {
     setSearchQuery('');
@@ -115,16 +113,12 @@ const SearchScreen = () => {
         name: item.name,
         quantity: item.quantity,
         quantityType: item.quantityType,
-        imagePath: item.image
+        imagePath: item.image || undefined
       });
-      showNotification(`${item.name} added to shopping list`);
+      //showNotification(`${item.name} added to shopping list`);
     } catch (error) {
       console.error('Error adding item to shop list:', error);
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('Failed to add item', ToastAndroid.SHORT);
-      } else {
-        Alert.alert('Error', 'Failed to add item');
-      }
+      showNotification('Failed to add item to shopping list', true);
     }
   };
 
@@ -135,28 +129,29 @@ const SearchScreen = () => {
         quantity: item.quantity,
         quantityType: item.quantityType,
         imagePath: item.image
+        
       };
-
+      console.log('Adding to shop list with image:', item.image);
       const newItem = await DatabaseService.items.create(newItemData);
       setItems(prevItems => [...prevItems, newItem]);
       setFilteredItems(prevItems => [...prevItems, newItem]);
       setShowNewItemCard(false);
 
-      await handleAddToShopList(item);
+      //await handleAddToShopList(item);
     } catch (error) {
       console.error('Error adding new item:', error);
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('Failed to create new item', ToastAndroid.SHORT);
-      } else {
-        Alert.alert('Error', 'Failed to create new item');
-      }
+      showNotification('Failed to create new item', true);
     }
+  };
+
+  const handleItemPress = (item: DatabaseItem) => {
+    router.push(`/Home/ItemView?id=${item.id}`);
   };
 
   const renderItem = useCallback(({ item }: { item: DatabaseItem }) => (
     <ItemCard 
       item={{
-        id: parseInt(item.id),
+        id: item.id,  // No need to parse as number anymore
         name: item.name,
         image: item.imagePath,
         quantity: item.quantity,
@@ -164,9 +159,11 @@ const SearchScreen = () => {
       }}
       onAdd={handleAddToShopList}
       onDelete={handleDeleteItem}
+      onPress={() => handleItemPress(item)}
       isNewItem={false}
     />
   ), []);
+
   const getHeaderComponent = useCallback(() => {
     if (searchQuery.trim() !== '' && showNewItemCard) {
       const newItemCard = {
@@ -213,12 +210,12 @@ const SearchScreen = () => {
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.backgroundAlt,
   },
   headerContainer: {
     marginBottom: 10,

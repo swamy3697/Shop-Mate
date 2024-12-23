@@ -28,21 +28,28 @@ export const Storage = {
   items: {
     async getAll(): Promise<Item[]> {
       const data = await AsyncStorage.getItem(ITEMS_STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
+      if (!data) return [];
+      return JSON.parse(data);
     },
 
     async save(items: Item[]): Promise<void> {
-      await AsyncStorage.setItem(ITEMS_STORAGE_KEY, JSON.stringify(items));
+      await AsyncStorage.setItem(ITEMS_STORAGE_KEY, JSON.stringify(items, null, 2));
     }
   },
   shopList: {
     async getAll(): Promise<ShopListItem[]> {
       const data = await AsyncStorage.getItem(SHOP_LIST_STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
+      if (!data) return [];
+      return JSON.parse(data).map((item: any) => ({
+        ...item,
+        createdAt: new Date(item.createdAt),
+        updatedAt: new Date(item.updatedAt),
+        imagePath: item.imagePath || undefined
+      }));
     },
 
     async save(items: ShopListItem[]): Promise<void> {
-      await AsyncStorage.setItem(SHOP_LIST_STORAGE_KEY, JSON.stringify(items));
+      await AsyncStorage.setItem(SHOP_LIST_STORAGE_KEY, JSON.stringify(items, null, 2));
     }
   }
 };

@@ -3,14 +3,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, TouchableOpacity, FlatList, Text } from "react-native";
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from "@expo/vector-icons";
-
 import EmptyDoodleContainer from "@/app/components/emptyDoodleContainer";
-import Colors from "@/app/Colors";
+import { Colors,ColorOpacity } from '@/app/Colors';
 import DummySearchBar from "@/app/components/dummySearchBar";
 import ShopListItemCard from "@/app/components/shopListItemCard/ShopListItemCard";
 import { DatabaseService } from "@/app/services/databaseService";
 import { ShopListItem } from "@/app/models/schema";
-
 export default function HomeScreen() {
   const [shopList, setShopList] = useState<ShopListItem[]>([]);
 
@@ -122,7 +120,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.backgroundAlt,
   },
   searchBarContainer: {
     width: "100%",
@@ -131,14 +129,14 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: Colors.borderLight,
     marginVertical: 10,
     marginHorizontal: 15,
   },
   clearButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.ratingYellow,
+    backgroundColor: Colors.error,
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 8,

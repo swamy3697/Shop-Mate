@@ -3,7 +3,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Colors from '@/app/Colors';
+import { Colors,ColorOpacity } from '@/app/Colors';
 
 interface EmptySearchResultProps {
   searchTerm: string;

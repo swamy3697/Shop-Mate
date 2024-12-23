@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
-import Colors from '@/app/Colors';
+import { Colors,ColorOpacity } from '@/app/Colors';
 
 function EmptyDoodleContainer() {
     return (
@@ -10,7 +10,7 @@ function EmptyDoodleContainer() {
             <Ionicons 
                 name="cart-outline" 
                 size={100} 
-                color={Colors.lightGreen}
+                color={Colors.forestGreen}
             />
             <Text style={styles.title}>Your shopping list is empty</Text>
             <Text style={styles.subtitle}>

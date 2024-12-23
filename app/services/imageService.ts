@@ -1,6 +1,6 @@
-// app/services/imageService.ts
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
 
 export const ImageService = {
@@ -16,6 +16,15 @@ export const ImageService = {
       };
     }
     return { camera: false, library: false };
+  },
+
+  // Open device settings
+  openSettings: async () => {
+    if (Platform.OS === 'ios') {
+      await Linking.openURL('app-settings:');
+    } else {
+      await Linking.openSettings();
+    }
   },
 
   // Save image to local storage
@@ -80,4 +89,15 @@ export const ImageService = {
       throw error;
     }
   },
+
+  // Check if image exists
+  checkImageExists: async (path: string): Promise<boolean> => {
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(path);
+      return fileInfo.exists;
+    } catch (error) {
+      console.error('Error checking image:', error);
+      return false;
+    }
+  }
 };

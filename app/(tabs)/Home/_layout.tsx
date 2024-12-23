@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import Colors from "@/app/Colors";
+import { Colors,ColorOpacity } from '@/app/Colors';
 
 export default function HomeLayout() {
   return (
@@ -13,7 +13,7 @@ export default function HomeLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Home" }} />
       <Stack.Screen name="search" options={{ title: "Search" }} />
-      <Stack.Screen name="itemView" options={{ title: "Item" }} />
+      <Stack.Screen name="ItemView" options={{ title: "Item" }} />
     
     </Stack>
   );

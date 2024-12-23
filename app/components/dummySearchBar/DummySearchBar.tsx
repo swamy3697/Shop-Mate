@@ -3,7 +3,7 @@ import React from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from 'expo-router';
-import Colors from "@/app/Colors";
+import { Colors,ColorOpacity } from '@/app/Colors';
 
 interface LocationSearchBarProps {
   onSearch: (query: string) => void;
@@ -43,10 +43,12 @@ const DummySearchBar: React.FC<LocationSearchBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: Colors.white,
     borderRadius: 10,
     height: 50,
     width: "100%",
+    borderColor:Colors.borderDark,
+    borderWidth:0.5
   },
   searchContent: {
     flex: 1,

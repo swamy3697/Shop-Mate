@@ -2,8 +2,7 @@
 import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Colors from '@/app/Colors';
-
+import { Colors,ColorOpacity } from '@/app/Colors';
 interface SearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
@@ -43,11 +42,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: Colors.white,
     borderRadius: 10,
     height: 50,
     marginHorizontal: 15,
     marginVertical: 10,
+    borderColor:Colors.borderDark,
+    borderWidth:0.5
   },
   searchContent: {
     flex: 1,

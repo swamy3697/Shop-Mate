@@ -1,19 +1,19 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import colors from "../Colors";
+import { Colors,ColorOpacity } from '@/app/Colors';
 import { StatusBar, Platform } from "react-native";
-import Colors from "../Colors";
+
 
 export default function TabLayout() {
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primaryGreen} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.primaryGreen} />
       <Tabs
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
-            backgroundColor: colors.primaryGreen,
+            backgroundColor: Colors.primaryGreen,
             height: Platform.OS === "android" ? 55 : 50,
           },
         }}
@@ -22,8 +22,8 @@ export default function TabLayout() {
           name="Home"
           options={{
             title: "Home",
-            tabBarActiveTintColor: colors.white,
-            tabBarInactiveBackgroundColor: colors.white,
+            tabBarActiveTintColor: Colors.white,
+            tabBarInactiveBackgroundColor: Colors.white,
             tabBarIcon: ({ color }) => <FontAwesome name="home" size={24} color={color} />,
           }}
         />
@@ -32,8 +32,8 @@ export default function TabLayout() {
           name="settings"
           options={{
             title: "settings",
-            tabBarInactiveBackgroundColor: colors.white,
-            tabBarActiveTintColor: colors.white,
+            tabBarInactiveBackgroundColor: Colors.white,
+            tabBarActiveTintColor: Colors.white,
             tabBarIcon: ({ color }) => <FontAwesome name="gear" size={24} color={color} />,
           }}
         />
