@@ -57,7 +57,8 @@ export const ImageService = {
   pickImage: async (useCamera: boolean = false): Promise<string | null> => {
     try {
       const options: ImagePicker.ImagePickerOptions = {
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // it is modified by me from mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,

@@ -47,6 +47,7 @@ const SearchScreen = () => {
   // Add useFocusEffect to reload data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
+      //console.log("focus in on screen page ")
       loadItems();
     }, [loadItems])
   );
