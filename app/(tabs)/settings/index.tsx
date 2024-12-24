@@ -29,13 +29,17 @@ export default function SettingsScreen() {
   };
 
   const settingsOptions = [
+
+
     {
       icon: 'moon-outline',
       title: 'Dark Mode',
       type: 'switch',
       value: darkMode,
       onChange: setDarkMode
-    },
+    }
+    
+    ,
     {
       icon: 'notifications-outline',
       title: 'Notifications',
@@ -76,7 +80,7 @@ export default function SettingsScreen() {
         >
           <View style={styles.optionContent}>
             <Ionicons 
-              name={option.icon} 
+              name={option.icon}           
               size={24} 
               color={option.color || Colors.darkGray} 
             />

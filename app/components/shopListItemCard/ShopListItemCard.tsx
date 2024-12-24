@@ -7,7 +7,7 @@ interface ShopListItemCardProps {
   item: {
     id: string;
     name: string;
-    image?: string;
+    imagePath: string;
     quantity: number;
     quantityType: string;
     completed: boolean;
@@ -24,12 +24,12 @@ const ShopListItemCard: React.FC<ShopListItemCardProps> = memo(({
   const defaultImage = require('../../assets/images/default.png');
 
   const getImageSource = () => {
-    console.log('ShopListItem received:', item);
-    if (!item.image && !item.image) return defaultImage;
-    return { uri: item.image|| item.image };
+    //console.log('ShopListItem received:', item.imagePath);
+    if (!item.imagePath && !item.imagePath) return defaultImage;
+    return { uri: item.imagePath|| item.imagePath };
   };
 
-  console.log(item.image);
+  //console.log(item.imagePath);
 
   return (
     <View style={[styles.container, item.completed && styles.completedContainer]}>

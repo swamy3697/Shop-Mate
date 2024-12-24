@@ -11,7 +11,7 @@ import { Item as DatabaseItem } from '@/app/models/schema';
 interface ItemCardProps {
   id?: string;
   name: string;
-  image?: string;
+  imagePath?: string;
   quantity: number;
   quantityType: string;
 }
@@ -113,12 +113,11 @@ const SearchScreen = () => {
         name: item.name,
         quantity: item.quantity,
         quantityType: item.quantityType,
-        imagePath: item.image || undefined
+        imagePath: item.imagePath // Use imagePath instead of image
       });
-      //showNotification(`${item.name} added to shopping list`);
     } catch (error) {
       console.error('Error adding item to shop list:', error);
-      showNotification('Failed to add item to shopping list', true);
+      showNotification('Failed to add item to shop list', true);
     }
   };
 
@@ -128,10 +127,10 @@ const SearchScreen = () => {
         name: item.name,
         quantity: item.quantity,
         quantityType: item.quantityType,
-        imagePath: item.image
+        imagePath: item.imagePath
         
       };
-      console.log('Adding to shop list with image:', item.image);
+      //console.log('Adding to shop list with image:', item.imagePath);
       const newItem = await DatabaseService.items.create(newItemData);
       setItems(prevItems => [...prevItems, newItem]);
       setFilteredItems(prevItems => [...prevItems, newItem]);
@@ -153,7 +152,7 @@ const SearchScreen = () => {
       item={{
         id: item.id,  // No need to parse as number anymore
         name: item.name,
-        image: item.imagePath,
+        imagePath: item.imagePath,
         quantity: item.quantity,
         quantityType: item.quantityType
       }}

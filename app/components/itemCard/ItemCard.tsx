@@ -12,7 +12,7 @@ interface ItemCardProps {
   item: {
     id?: string;
     name: string;
-    image?: string;
+    imagePath?: string;
     quantity: number;
     quantityType: string;
   };
@@ -30,7 +30,7 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, onDelete, isNewIt
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(quantity.toString());
   const [isAdded, setIsAdded] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | undefined>(item.image);
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(item.imagePath);
   const fadeAnim = new Animated.Value(1);
 
   const handleImagePress = () => {
@@ -81,8 +81,8 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, onDelete, isNewIt
   };
 
   const getImageSource = () => {
-    if (!selectedImage && !item.image) return defaultImage;
-    return { uri: selectedImage || item.image };
+    if (!selectedImage && !item.imagePath) return defaultImage;
+    return { uri: selectedImage || item.imagePath };
   };
 
   const formatDecimal = (value: number): string => {
@@ -130,9 +130,9 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, onDelete, isNewIt
   };
 
   const handleAdd = () => {
-    console.log('Selected image before adding:', selectedImage);
+    //console.log('Selected image before adding:', selectedImage);
     setIsAdded(true);
-    onAdd({ ...item, quantity, quantityType, image: selectedImage });
+    onAdd({ ...item, quantity, quantityType, imagePath: selectedImage });
     Animated.sequence([
       Animated.timing(fadeAnim, {
         toValue: 0,

@@ -9,6 +9,7 @@ import DummySearchBar from "@/app/components/dummySearchBar";
 import ShopListItemCard from "@/app/components/shopListItemCard/ShopListItemCard";
 import { DatabaseService } from "@/app/services/databaseService";
 import { ShopListItem } from "@/app/models/schema";
+import ShareButton from "@/app/components/shareButton";
 export default function HomeScreen() {
   const [shopList, setShopList] = useState<ShopListItem[]>([]);
 
@@ -103,16 +104,19 @@ export default function HomeScreen() {
 
       {/* Shopping List */}
       {shopList.length > 0 ? (
-        <FlatList
-          data={shopList}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          style={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-        />
-      ) : (
-        <EmptyDoodleContainer />
-      )}
+  <>
+    <FlatList
+      data={shopList}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id}
+      style={styles.listContainer}
+      showsVerticalScrollIndicator={false}
+    />
+    <ShareButton shopList={shopList} />
+  </>
+) : (
+  <EmptyDoodleContainer />
+)}
     </View>
   );
 }

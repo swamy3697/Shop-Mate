@@ -65,6 +65,7 @@ export const DatabaseService = {
 
   shopList: {
     async addItem(item: Omit<ShopListItem, 'id' | 'createdAt' | 'updatedAt' | 'completed'>): Promise<ShopListItem> {
+      //console.log('Adding item with image:', item.imagePath); 
       const items = await Storage.shopList.getAll();
       const newItem: ShopListItem = {
         id: generateId(),
@@ -74,6 +75,7 @@ export const DatabaseService = {
         createdAt: new Date(),
         updatedAt: new Date()
       };
+      //console.log('New item created:', newItem);
       items.push(newItem);
       await Storage.shopList.save(items);
       return newItem;
