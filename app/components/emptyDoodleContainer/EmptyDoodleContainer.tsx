@@ -1,21 +1,35 @@
-// app/components/emptyDoodleContainer/EmptyDoodleContainer.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
-import { Colors,ColorOpacity } from '@/app/Colors';
+import { Colors } from '@/app/Colors';
 
-function EmptyDoodleContainer() {
+// Importing the type for Ionicons icon names
+type IoniconsName = keyof typeof Ionicons.glyphMap;
+
+type EmptyDoodleContainerProps = {
+    iconName: IoniconsName; // Ensures the name is strictly typed
+    iconSize?: number;
+    iconColor?: string;
+    title: string;
+    subtitle: string;
+};
+
+function EmptyDoodleContainer({
+    iconName,
+    iconSize = 100,
+    iconColor = Colors.forestGreen,
+    title,
+    subtitle,
+}: EmptyDoodleContainerProps) {
     return (
         <View style={styles.container}>
             <Ionicons 
-                name="cart-outline" 
-                size={100} 
-                color={Colors.forestGreen}
+                name={iconName} 
+                size={iconSize} 
+                color={iconColor}
             />
-            <Text style={styles.title}>Your shopping list is empty</Text>
-            <Text style={styles.subtitle}>
-                Search and add items to your shopping list
-            </Text>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
     );
 }

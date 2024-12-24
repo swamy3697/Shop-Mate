@@ -7,7 +7,7 @@ interface ShopListItemCardProps {
   item: {
     id: string;
     name: string;
-    imagePath: string;
+    imagePath?: string;
     quantity: number;
     quantityType: string;
     completed: boolean;

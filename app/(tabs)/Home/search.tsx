@@ -7,6 +7,7 @@ import EmptySearchResult from '@/app/components/EmptySearchResults';
 import { Colors,ColorOpacity } from '@/app/Colors';
 import { DatabaseService } from '@/app/services/databaseService';
 import { Item as DatabaseItem } from '@/app/models/schema';
+import EmptyDoodleContainer from '@/app/components/emptyDoodleContainer';
 
 interface ItemCardProps {
   id?: string;
@@ -196,17 +197,19 @@ const SearchScreen = () => {
         placeholder="Search for items..."
       />
 
-      <FlatList
-        data={filteredItems}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        ListHeaderComponent={getHeaderComponent}
-        contentContainerStyle={styles.listContainer}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        windowSize={5}
-        keyboardShouldPersistTaps="handled"
-      />
+     
+    <FlatList
+    data={filteredItems}
+    renderItem={renderItem}
+    keyExtractor={item => item.id}
+    ListHeaderComponent={getHeaderComponent}
+    contentContainerStyle={styles.listContainer}
+    removeClippedSubviews={true}
+    maxToRenderPerBatch={10}
+    windowSize={5}
+    keyboardShouldPersistTaps="handled"
+    />
+     
     </View>
   );
 };

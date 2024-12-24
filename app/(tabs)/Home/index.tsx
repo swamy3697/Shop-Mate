@@ -115,7 +115,12 @@ export default function HomeScreen() {
     <ShareButton shopList={shopList} />
   </>
 ) : (
-  <EmptyDoodleContainer />
+  <EmptyDoodleContainer
+  iconName="cart-outline"
+  title="Your Shop list is empty"
+  subtitle="Search and add items to your Shop list"
+  iconColor={Colors.forestGreen}
+/>
 )}
     </View>
   );
