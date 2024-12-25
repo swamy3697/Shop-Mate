@@ -1,7 +1,6 @@
 import React, { useState, memo } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput, Modal, Animated, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { Colors } from '@/app/Colors';
 import { ImageService } from '@/app/services/imageService';
 
@@ -21,8 +20,7 @@ interface ItemCardProps {
   onPress?: () => void;
   isNewItem: boolean;
 }
-
-const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, onDelete, isNewItem = false }) => {
+const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, onDelete, onPress, isNewItem = false }) => {
   const [quantity, setQuantity] = useState<number>(item.quantity || 1);
   const [quantityType, setQuantityType] = useState<string>(item.quantityType || 'Pieces');
   const [showModal, setShowModal] = useState(false);
@@ -148,11 +146,8 @@ const ItemCard: React.FC<ItemCardProps> = memo(({ item, onAdd, onDelete, isNewIt
   };
 
   const handleItemPress = () => {
-    if (item.id) {
-      router.push({
-        pathname: '/Home/ItemView',
-        params: { id: item.id }
-      });
+    if (item.id && onPress) {
+      onPress();
     }
   };
 

@@ -1,13 +1,14 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { View, FlatList, StyleSheet, ToastAndroid, Platform, Alert } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
+import debounce from 'lodash/debounce';
 import SearchBar from '@/app/components/searchBar';
 import ItemCard from '@/app/components/itemCard';
 import EmptySearchResult from '@/app/components/EmptySearchResults';
-import { Colors,ColorOpacity } from '@/app/Colors';
+import { Colors } from '@/app/Colors';
 import { DatabaseService } from '@/app/services/databaseService';
 import { Item as DatabaseItem } from '@/app/models/schema';
-import EmptyDoodleContainer from '@/app/components/emptyDoodleContainer';
+import ItemDialog from '@/app/components/itemDialog';
 
 interface ItemCardProps {
   id?: string;
@@ -20,36 +21,60 @@ interface ItemCardProps {
 const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [items, setItems] = useState<DatabaseItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<DatabaseItem[]>([]);
-  const [showNewItemCard, setShowNewItemCard] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadItems = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const dbItems = await DatabaseService.items.getAll();
-      setItems(dbItems);
-      
-      // Reapply current search filter to the new items
-      if (searchQuery.trim() !== '') {
-        handleSearch(searchQuery);
-      } else {
-        setFilteredItems(dbItems);
-      }
-    } catch (error) {
-      console.error('Error loading items:', error);
-      showNotification('Failed to load items', true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchQuery]); // Include searchQuery in dependencies
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
 
-  // Add useFocusEffect to reload data when screen comes into focus
+  // Memoize filtered items to prevent unnecessary recalculations
+  const { filteredItems, showNewItemCard } = useMemo(() => {
+    const trimmedQuery = searchQuery.trim().toLowerCase();
+    
+    if (!trimmedQuery) {
+      return { filteredItems: items, showNewItemCard: false };
+    }
+
+    // First, check for exact matches (case-insensitive)
+    const exactMatches = items.filter(item => 
+      item.name.toLowerCase() === trimmedQuery
+    );
+
+    if (exactMatches.length > 0) {
+      return { filteredItems: exactMatches, showNewItemCard: false };
+    }
+
+    // Then, check for partial matches
+    const partialMatches = items.filter(item =>
+      item.name.toLowerCase().includes(trimmedQuery)
+    );
+
+    return { 
+      filteredItems: partialMatches, 
+      showNewItemCard: true 
+    };
+  }, [items, searchQuery]);
+
+  const loadItems = useCallback(async () => {
+    if (!isDialogVisible) { // Only load if dialog is not visible
+      try {
+        setIsLoading(true);
+        const dbItems = await DatabaseService.items.getAll();
+        setItems(dbItems);
+      } catch (error) {
+        console.error('Error loading items:', error);
+        showNotification('Failed to load items', true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, [isDialogVisible]); 
+
   useFocusEffect(
     useCallback(() => {
-      //console.log("focus in on screen page ")
-      loadItems();
-    }, [loadItems])
+      if (!isDialogVisible) { // Only load when dialog is not visible
+        loadItems();
+      }
+    }, [loadItems, isDialogVisible])
   );
 
   const showNotification = (message: string, isError: boolean = false) => {
@@ -60,99 +85,85 @@ const SearchScreen = () => {
     }
   };
 
+  // Debounced search handler
+  const debouncedSearch = useMemo(
+    () => debounce((text: string) => {
+      setSearchQuery(text);
+    }, 300), // 300ms delay
+    []
+  );
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
   const handleSearch = useCallback((text: string) => {
+    // Update the input value immediately for UI responsiveness
     setSearchQuery(text);
-    
-    if (text.trim() === '') {
-      setFilteredItems(items);
-      setShowNewItemCard(false);
-      return;
-    }
-
-    // First, check for exact matches (case-insensitive)
-    const exactMatches = items.filter(item => 
-      item.name.toLowerCase() === text.toLowerCase()
-    );
-
-    if (exactMatches.length > 0) {
-      setFilteredItems(exactMatches);
-      setShowNewItemCard(false);
-      return;
-    }
-
-    // Then, check for partial matches
-    const partialMatches = items.filter(item =>
-      item.name.toLowerCase().includes(text.toLowerCase())
-    );
-
-    setFilteredItems(partialMatches);
-    setShowNewItemCard(true);
-  }, [items]);
-
-  const handleDeleteItem = async (itemId: string) => {
-    try {
-      await DatabaseService.items.delete(itemId);
-      showNotification('Item deleted successfully');
-      loadItems(); // Reload items after deletion
-    } catch (error) {
-      console.error('Error deleting item:', error);
-      showNotification('Failed to delete item', true);
-    }
-  };
-
-  // Rest of the component remains the same...
-  // (Keep all other existing code, just ensure loadItems is called when needed)
+    // Debounce the actual search operation
+    debouncedSearch(text);
+  }, [debouncedSearch]);
 
   const handleClear = useCallback(() => {
     setSearchQuery('');
-    setFilteredItems(items);
-    setShowNewItemCard(false);
-  }, [items]);
+    debouncedSearch.cancel();
+  }, [debouncedSearch]);
 
-  const handleAddToShopList = async (item: ItemCardProps) => {
+  const handleAddToShopList = useCallback(async (item: ItemCardProps) => {
     try {
       await DatabaseService.shopList.addItem({
         name: item.name,
         quantity: item.quantity,
         quantityType: item.quantityType,
-        imagePath: item.imagePath // Use imagePath instead of image
+        imagePath: item.imagePath
       });
     } catch (error) {
       console.error('Error adding item to shop list:', error);
       showNotification('Failed to add item to shop list', true);
     }
-  };
+  }, []);
 
-  const handleAddNewItem = async (item: ItemCardProps) => {
+  const handleAddNewItem = useCallback(async (item: ItemCardProps) => {
     try {
       const newItemData = {
         name: item.name,
         quantity: item.quantity,
         quantityType: item.quantityType,
         imagePath: item.imagePath
-        
       };
-      //console.log('Adding to shop list with image:', item.imagePath);
       const newItem = await DatabaseService.items.create(newItemData);
       setItems(prevItems => [...prevItems, newItem]);
-      setFilteredItems(prevItems => [...prevItems, newItem]);
-      setShowNewItemCard(false);
-
-      //await handleAddToShopList(item);
+      showNotification('Item created successfully');
     } catch (error) {
       console.error('Error adding new item:', error);
       showNotification('Failed to create new item', true);
     }
-  };
+  }, []);
+
+  const handleDeleteItem = useCallback(async (itemId: string) => {
+    try {
+      await DatabaseService.items.delete(itemId);
+      setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+      showNotification('Item deleted successfully');
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      showNotification('Failed to delete item', true);
+    }
+  }, []);
 
   const handleItemPress = (item: DatabaseItem) => {
-    router.push(`/Home/ItemView?id=${item.id}`);
+    setSelectedItemId(item.id);
+    setIsDialogVisible(true);
+    
   };
 
   const renderItem = useCallback(({ item }: { item: DatabaseItem }) => (
     <ItemCard 
       item={{
-        id: item.id,  // No need to parse as number anymore
+        id: item.id,
         name: item.name,
         imagePath: item.imagePath,
         quantity: item.quantity,
@@ -163,7 +174,7 @@ const SearchScreen = () => {
       onPress={() => handleItemPress(item)}
       isNewItem={false}
     />
-  ), []);
+  ), [handleAddToShopList, handleDeleteItem, handleItemPress]);
 
   const getHeaderComponent = useCallback(() => {
     if (searchQuery.trim() !== '' && showNewItemCard) {
@@ -187,30 +198,42 @@ const SearchScreen = () => {
       );
     }
     return null;
-  }, [searchQuery, showNewItemCard, filteredItems.length]);
+  }, [searchQuery, showNewItemCard, filteredItems.length, handleAddNewItem]);
+
+  const keyExtractor = useCallback((item: DatabaseItem) => item.id, []);
 
   return (
     <View style={styles.container}>
       <SearchBar
-        onClear={handleClear}
         value={searchQuery}
         onChangeText={handleSearch}
-        placeholder="Search for items..."
+        onClear={handleClear}
+        placeholder="Search and add items..."
+      />
+      <FlatList
+        data={filteredItems}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        ListHeaderComponent={getHeaderComponent}
+        contentContainerStyle={styles.listContainer}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        keyboardShouldPersistTaps="handled"
       />
 
-     
-    <FlatList
-    data={filteredItems}
-    renderItem={renderItem}
-    keyExtractor={item => item.id}
-    ListHeaderComponent={getHeaderComponent}
-    contentContainerStyle={styles.listContainer}
-    removeClippedSubviews={true}
-    maxToRenderPerBatch={10}
-    windowSize={5}
-    keyboardShouldPersistTaps="handled"
-    />
-     
+<ItemDialog
+  visible={isDialogVisible}
+  itemId={selectedItemId}
+  onClose={() => {
+    setIsDialogVisible(false);
+    setSelectedItemId(null);
+  }}
+  onItemUpdated={async () => {
+    // Make this async and wait for loadItems
+    await loadItems();
+  }}
+/>
     </View>
   );
 };
